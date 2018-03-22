@@ -101,6 +101,7 @@ module.exports.routes = {
   'PUT /task': 'TaskController.update',
   'PUT /task/finish': 'TaskController.finishTask',
   'PUT /task/sale': 'TaskController.updateSale',
+  'PUT /task/sale/undo': 'TaskController.undoSale',
 
   //sales dash
   'POST /sales/today' : 'SalesDashController.listTodaySales',

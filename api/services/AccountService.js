@@ -2,7 +2,7 @@ const CheckService = require('./checkService')
 
 const AccountService = {
 
-  accountReceivableDr: function (companyId, clientName, op_name, amount) {
+  accountReceivableDr: function (companyId, clientName, op_name, amount,maker) {
     CheckService.checkClientName(companyId, clientName)
       .then(_client => {
         Account.create({
@@ -10,7 +10,8 @@ const AccountService = {
           op_name: op_name,
           direction: '借',
           amount: amount,
-          client: _client.id
+          client: _client.id,
+          maker:maker
         })
           .then(account => {
             _client.receivable = Number(_client.receivable) + Number(amount)
@@ -19,7 +20,7 @@ const AccountService = {
       })
   },
 
-  accountReceivableCr: function (companyId, clientName, op_name, amount) {
+  accountReceivableCr: function (companyId, clientName, op_name, amount,maker) {
     CheckService.checkClientName(companyId, clientName)
       .then(_client => {
         Account.create({
@@ -27,7 +28,8 @@ const AccountService = {
           op_name: op_name,
           direction: '贷',
           amount: amount,
-          client: _client.id
+          client: _client.id,
+          maker:maker
         })
           .then(account => {
             _client.receivable = Number(_client.receivable) - Number(amount)
@@ -38,7 +40,7 @@ const AccountService = {
   },
 
 
-  accountPayableDr: function (companyId, supplierName, op_name, amount) {
+  accountPayableDr: function (companyId, supplierName, op_name, amount,maker) {
     CheckService.checkSupplierName(companyId, supplierName)
       .then(_supplier => {
         Account.create({
@@ -46,7 +48,8 @@ const AccountService = {
           op_name: op_name,
           direction: '借',
           amount: amount,
-          supplier: _supplier.id
+          supplier: _supplier.id,
+          maker:maker
         })
           .then(account => {
             _supplier.payable = Number(_supplier.payable) - Number(amount)
@@ -55,7 +58,7 @@ const AccountService = {
       })
   },
 
-  accountPayableCr: function (companyId, supplierName, op_name, amount) {
+  accountPayableCr: function (companyId, supplierName, op_name, amount,maker) {
     CheckService.checkClientName(companyId, supplierName)
       .then(_supplier => {
         Account.create({
@@ -63,7 +66,8 @@ const AccountService = {
           op_name: op_name,
           direction: '贷',
           amount: amount,
-          client: _supplier.id
+          client: _supplier.id,
+          maker:maker
         })
           .then(account => {
             _supplier.payable = Number(_supplier.payable) + Number(amount)

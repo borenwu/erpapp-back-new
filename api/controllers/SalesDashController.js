@@ -53,7 +53,7 @@ module.exports = {
 
     NativeQueryService.aggregateQuery(Task, aggQuery)
       .then(result => {
-        res.json(result)
+        res.ok({status:200,result:result})
       })
       .catch(err => {
         console.log(err)
@@ -102,7 +102,7 @@ module.exports = {
 
     NativeQueryService.aggregateQuery(Task, aggQuery)
       .then(result => {
-        res.json(result)
+        res.ok({status:200,result:result})
       })
       .catch(err => {
         console.log(err)

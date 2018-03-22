@@ -13,6 +13,7 @@ module.exports = {
     op_name:{type:'string',required:true},
     direction:{type:'string', enum: ['借', '贷']},
     amount:{type:'float'},
+    maker:{type:'string'},
 
     client: {model: 'client', columnName: 'client_id'},
     supplier: {model: 'supplier', columnName: 'supplier_id'},

@@ -219,8 +219,6 @@ module.exports = {
 
     CheckService.checkClientName(companyId,clientName)
       .then(_client => {
-        // _client.receivable = Number(_client.receivable) + Number(sale)
-        // _client.save()
         return Task.update({id: taskId, client_id: _client.id},task)
       })
       .then(_task => {
@@ -237,7 +235,47 @@ module.exports = {
             task.client_id = task.client.id
 
             let op_name = '销售入账'
-            AccountService.accountReceivableDr(task.company,task.client_name,op_name,task.sale)
+            AccountService.accountReceivableDr(task.company,task.client_name,op_name,task.sale,checker)
+
+            return res.ok(task);
+          })
+      })
+      .catch(err => res.serverError(err))
+  },
+
+  undoSale:function (req,res) {
+    let companyId = req.param('company_id')
+    let clientName = req.param('client_name')
+    let taskId = req.param('task_id')
+    let oldSale = req.param('old_sale')
+    let updater = req.param('updater')
+    let check_time = moment().format('YYYY-MM-DD')
+
+    let task = {}
+
+    task.price = 0
+    task.sale = 0
+    task.checker = updater
+    task.check_time = check_time
+    task.saleOpDisable = false
+
+    CheckService.checkClientName(companyId,clientName)
+      .then(_client => {
+        return Task.update({id: taskId, client_id: _client.id},task)
+      })
+      .then(_task => {
+        if (!_task[0] || _task[0].length === 0) return res.notFound({err: 'No task found in our record'});
+        Task.findOne({id:_task[0].id}).populate('client')
+          .then((task,err)=>{
+            if (err) {
+              return res.serverError(err);
+            }
+
+            task.client_name = task.client.client_name
+            task.client_id = task.client.id
+
+            let op_name = '撤销记录'
+            AccountService.accountReceivableCr(task.company,task.client_name,op_name,oldSale,updater)
 
             return res.ok(task);
           })
