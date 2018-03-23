@@ -86,16 +86,10 @@ module.exports = {
     if (!supplierId) return res.badRequest({ err: 'supplier id is missing' });
 
     let supplier = {};
+    supplier.supplier_name = supplierName;
+    supplier.desc = desc;
+    supplier.payable = payable;
 
-    if (supplierName) {
-      supplier.supplier_name = supplierName;
-    }
-    if (desc) {
-      supplier.desc = desc;
-    }
-    if (payable) {
-      supplier.payable = payable;
-    }
 
 
     CheckService.checkCompanyId(companyId)

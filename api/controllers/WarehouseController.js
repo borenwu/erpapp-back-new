@@ -79,22 +79,12 @@ module.exports = {
     if (!warehouseItemId) return res.badRequest({ err: 'warehouse item id is missing' });
 
     let warehouseItem = {};
+    warehouseItem.item_name = itemName;
+    warehouseItem.item_type = itemType;
+    warehouseItem.desc = desc;
+    warehouseItem.unit = unit;
+    warehouseItem.balance = balance;
 
-    if(itemName){
-      warehouseItem.item_name = itemName
-    }
-    if(itemType){
-      warehouseItem.item_type = itemType
-    }
-    if(desc){
-      warehouseItem.desc = desc
-    }
-    if(unit){
-      warehouseItem.unit = unit
-    }
-    if(balance){
-      warehouseItem.balance = balance
-    }
 
     CheckService.checkSupplierName(companyId,supplierName)
       .then(_supplier => {
@@ -113,6 +103,56 @@ module.exports = {
           })
       })
       .catch(err => res.serverError(err))
+  },
+
+  stockItem:function (req,res) {
+    let warehouseItemId = req.param('item_id')
+    let companyId = req.param('company_id')
+    let supplierName = req.param('supplier_name')
+    let itemName = req.param('item_name')
+    let itemType = req.param('item_type')
+    let desc = req.param('desc')
+    let unit = req.param('unit')
+    let balance = req.param('balance')
+    let amount = req.param('amount')
+    let maker = req.param('maker')
+
+    if (!warehouseItemId) return res.badRequest({ err: 'warehouse item id is missing' });
+    let warehouseItem = {};
+    warehouseItem.balance = Number(balance) + Number(amount)
+
+    CheckService.checkSupplierName(companyId,supplierName)
+      .then(_supplier => {
+        return WarehouseItem.update({id: warehouseItemId, supplier_id: _supplier.id},warehouseItem)
+      })
+      .then(_warehouseItem => {
+        if (!_warehouseItem[0] || _warehouseItem[0].length === 0) return res.notFound({err: 'No warehouse item found in our record'});
+        WarehouseItem.findOne({id:_warehouseItem[0].id}).populate('supplier')
+          .then((warehouseItem,err)=>{
+            if (err) {
+              return res.serverError(err);
+            }
+            let stockOp = {
+              op_date:moment().format('YYYY-MM-DD'),
+              supplier_name:supplierName,
+              item_name:itemName,
+              item_type:itemType,
+              unit:unit,
+              amount:amount,
+              maker:maker,
+              warehouseItem:warehouseItem.id,
+              company:companyId
+            }
+            WarehouseStockOp.create(stockOp)
+              .then(warehouseStockOp=>{
+                warehouseItem.supplier_name = warehouseItem.supplier.supplier_name
+                warehouseItem.supplier_id = warehouseItem.supplier.id
+                return res.ok(warehouseItem);
+              })
+          })
+      })
+      .catch(err => res.serverError(err))
+
   },
 
   listAllItemsByCompany:function (req,res) {
@@ -222,6 +262,28 @@ module.exports = {
         if (!_warehouseOp || _warehouseOp.length === 0) return res.notFound({ err: 'No warehouse item op found in our record' });
         return res.ok({status:200,msg:'delete ok'});
       })
+  },
+
+  undoItemOp:function (req,res) {
+    let companyId = req.param('company_id')
+    let itemId = req.param('item_id')
+    let itemOpId = req.param('op_id')
+    let order = req.param('order')
+    let re = req.param('re')
+
+    CheckService.checkWarehouseItemId(companyId,itemId)
+      .then(_warehouseItem => {
+        let reduce = Number(order) - Number(re)
+        _warehouseItem.balance = Number(_warehouseItem.balance) + Number(reduce)
+        _warehouseItem.save()
+        return WarehouseOp.destroy({id: itemOpId, warehouseItem_id: _warehouseItem.id})
+      })
+      .then(_warehouseOp => {
+        if (!_warehouseOp || _warehouseOp.length === 0) return res.notFound({ err: 'No warehouse item op found in our record' });
+        return res.ok({status:200,msg:'delete ok'});
+      })
+      .catch(err => res.serverError(err))
+
   },
 
   updateItemOp: function (req, res) {

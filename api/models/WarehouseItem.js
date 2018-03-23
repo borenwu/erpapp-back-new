@@ -25,6 +25,11 @@ module.exports = {
       via: 'warehouseItem'
     },
 
+    warehouseStockOps:{
+      collection:'warehouseStockOp',
+      via:'warehouseItem'
+    },
+
     supplier: {model: 'supplier', columnName: 'supplier_id', required: true},
     company: {model: 'company', columnName: 'company_id', required: true},
   }

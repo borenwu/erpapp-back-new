@@ -84,17 +84,12 @@ module.exports = {
     if (!clientId) return res.badRequest({ err: 'client id is missing' });
 
     let client = {};
+    client.client_name = clientName;
+    client.desc = desc;
+    client.receivable = receivable;
 
-    if (clientName) {
-      client.client_name = clientName;
-    }
-    if (desc) {
-      client.desc = desc;
-    }
-    if (receivable) {
-      client.receivable = receivable;
-    }
 
+    console.log(client)
 
     CheckService.checkCompanyId(companyId)
       .then(_company => {
