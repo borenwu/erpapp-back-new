@@ -53,7 +53,11 @@ module.exports = {
 
     NativeQueryService.aggregateQuery(Task, aggQuery)
       .then(result => {
-        res.ok({status:200,result:result})
+        if(result.length === 0){
+          res.ok({status:201})
+        }else{
+          res.ok({status:200,result:result})
+        }
       })
       .catch(err => {
         console.log(err)
@@ -102,7 +106,11 @@ module.exports = {
 
     NativeQueryService.aggregateQuery(Task, aggQuery)
       .then(result => {
-        res.ok({status:200,result:result})
+        if(result.length === 0){
+          res.ok({status:201})
+        }else{
+          res.ok({status:200,result:result})
+        }
       })
       .catch(err => {
         console.log(err)
